@@ -1,0 +1,26 @@
+# Data files (large CSVs)
+data/*.csv
+!data/sample_submission.csv
+data/processed/
+*.feather
+*.parquet
+*.npy
+
+# Output binaries and models
+outputs/models/
+outputs/oof/
+outputs/test_preds/
+outputs/submissions/
+outputs/*.npy
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/
+env/
