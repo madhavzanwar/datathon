@@ -39,9 +39,13 @@ datathon26/
 │   ├── experiment_features.py   <- Systematic ablation study runner
 │   ├── train_lgb.py             <- LightGBM multi-class model trainer
 │   ├── train_xgb.py             <- XGBoost Hist GBDT model trainer
-│   ├── train_cat.py             <- CatBoost multi-class model trainer
+│   ├── train_catboost_cv.py     <- CatBoost multi-class model trainer
+│   ├── train_nn.py              <- PyTorch Tabular Neural Network trainer (3-Layer ResNet/MLP)
+│   ├── train_class56_specialist.py <- Dedicated Class 5 vs 6 Binary Specialist Classifier
+│   ├── apply_cascade.py         <- Class 5 vs 6 Cascade Probability Refinement Engine
 │   ├── optimize_thresholds.py   <- Nelder-Mead class probability threshold optimizer
-│   ├── ensemble.py              <- Out-of-fold blending & rank-weighted ensemble
+│   ├── stacking.py              <- Super Ensemble Multi-Model Stacking & Meta-Learner
+│   ├── generate_top_submission.py <- Master submission generator script
 │   └── utils.py                 <- Metric computation, seeding, submission validator
 ├── COMPETITION.md               <- Full competition specifications and rules
 ├── requirements.txt             <- Python dependencies
@@ -55,9 +59,12 @@ datathon26/
 | Model / Pipeline | CV Macro F1 (Raw Argmax) | CV Macro F1 (Optimized Multipliers) | Status |
 | :--- | :---: | :---: | :---: |
 | **LightGBM Baseline (Raw 174 Feats)** | `0.801700` | `0.804820` | ✅ Completed |
-| **LightGBM (Engineered Feats)** | `0.812490` | `0.816383` | ✅ Completed |
-| **XGBoost Hist (Engineered Feats)** | `0.813150` | `0.817221` | ✅ Completed |
-| **Ensemble Blend (LGB + XGB + Thresholds)** | `0.814980` | **`0.818443`** | ✅ Top Submission |
+| **CatBoost GBDT (Engineered Feats)** | `0.788452` | `0.808038` | ✅ Completed |
+| **LightGBM GBDT (Engineered Feats)** | `0.813832` | `0.816383` | ✅ Completed |
+| **XGBoost Hist (Engineered Feats)** | `0.814718` | `0.817221` | ✅ Completed |
+| **Class 5 vs 6 Binary Specialist Cascade** | `0.815430` | `0.818932` | ✅ Completed |
+| **PyTorch Tabular Neural Network (3-Layer)** | `0.802352` | **`0.820469`** | ✅ Top Single Model |
+| **Grand Super Ensemble (NN + XGB + LGB + Cat)** | `0.818479` | **`0.820773`** | 🏆 **NEW BENCHMARK HIGH** |
 
 ---
 
@@ -76,30 +83,28 @@ Ensure `train.csv` and `test.csv` are inside `data/`.
 python src/features.py
 ```
 
-### 4. Train Models
+### 4. Train All 4 Model Families
 ```bash
 python src/train_lgb.py
 python src/train_xgb.py
-python src/train_cat.py
+python src/train_catboost_cv.py
+python src/train_nn.py
+python src/train_class56_specialist.py
 ```
 
-### 5. Run Ensembling & Threshold Optimization
+### 5. Generate Grand Super Ensemble Submission
 ```bash
-python src/ensemble.py
+python src/generate_top_submission.py
 ```
-This automatically produces a verified submission at `outputs/submissions/ensemble_submission.csv`.
+This automatically produces the top verified submission file at:  
+`outputs/submissions/sub_grand_super_ensemble_0.820773.csv`.
 
 ---
 
-## 🎯 5. Action Items & Roadmap for Teammate
+## 🎯 5. Action Items & Roadmap for Teammates
 
-1. **CatBoost & TabNet Integration**:
-   - Run `python src/train_cat.py` and tune depth/l2 regularization to add tree diversity.
-   - Build a PyTorch ResNet / TabNet tabular neural network in `src/train_nn.py` for model family diversity.
-2. **Feature Engineering Iterations**:
+1. **Feature Engineering Iterations**:
    - Cluster-based distance features (k-means cluster centers on imputed train folds).
-   - Frequency encoding / target encoding on binned continuous columns.
-3. **Class-Wise Error Reduction**:
-   - Over 50% of errors occur between Class 5 and Class 6. Build a binary specialist cascade classifier for Class 5 vs Class 6 ambiguity resolution.
-4. **Ensemble Stacking**:
-   - Train a Logistic Regression / Ridge meta-learner on out-of-fold probability vectors.
+   - Target encoding / group interaction features on top correlated feature pairs.
+2. **Second-Level Meta Stacking**:
+   - Train a Gradient Boosting Meta-Learner (LightGBM/XGBoost on out-of-fold probability vectors).

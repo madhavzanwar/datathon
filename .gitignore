@@ -12,6 +12,7 @@ outputs/oof/
 outputs/test_preds/
 outputs/submissions/
 outputs/*.npy
+catboost_info/
 
 # Python bytecode & cache
 __pycache__/
